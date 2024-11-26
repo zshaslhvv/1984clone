@@ -1,0 +1,36 @@
+name: Decrypt, Extract, and Deploy to GitHub Pages
+
+on:
+  workflow_dispatch:
+
+jobs:
+  decrypt-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up GPG
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gnupg
+
+      - name: Decrypt the file
+        run: |
+          gpg --batch --passphrase "${{ secrets.DECRYPTION_KEY }}" --decrypt --output project.tar.gz project.tar.gz.gpg
+
+      - name: Try extracting the tarball without compression
+        run: |
+          tar -xvf project.tar.gz
+          
+      - name: "Build it"  
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}      
+        run: |
+          # Set up the remote URL to use the GitHub token for authentication
+          git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
+            git config --global user.email "${{ secrets.EMAIL }}"
+            git config --global user.name "zshaslhvv"
+            npm i
+            GH_TOKEN=${{ secrets.GITHUB_TOKEN }} npm run deploy
