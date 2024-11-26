@@ -15,4 +15,3 @@ jobs:
         run: |
           git fetch origin
           git push origin --delete gh-pages
-          git branch -D gh-pages
